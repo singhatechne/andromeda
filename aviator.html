@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviator Professional Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #000; color: #fff; overflow: hidden; }
+        
+        /* The Sunburst Background effect from the image */
+        .aviator-game-area {
+            background: 
+                radial-gradient(circle at bottom left, rgba(209, 28, 51, 0.15) 0%, transparent 40%),
+                repeating-conic-gradient(from 0deg at 0% 100%, #000 0deg 10deg, #111 10deg 20deg);
+            background-size: cover;
+            position: relative;
+        }
+
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #141518; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        
+        .history-pill { font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 10px; }
+        
+        /* Smooth Curve Animation */
+        #curve {
+            transition: d 0.1s linear;
+        }
+
+        @keyframes plane-vibrate {
+            0% { transform: translate(0,0) rotate(0deg); }
+            25% { transform: translate(1px, 1px) rotate(1deg); }
+            50% { transform: translate(-1px, -1px) rotate(-1deg); }
+            75% { transform: translate(1px, -1px) rotate(0deg); }
+            100% { transform: translate(0,0) rotate(0deg); }
+        }
+        .vibrate { animation: plane-vibrate 0.1s infinite; }
+    </style>
+</head>
+<body class="h-screen flex flex-col bg-[#141518]">
+
+    <nav class="flex items-center justify-between px-4 py-1 bg-[#1b1c21]">
+        <div class="flex items-center gap-2">
+            <span class="italic font-black text-red-600 text-xl tracking-tighter">Aviator</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 bg-black px-4 py-1 rounded-full border border-gray-800">
+                <span class="text-green-500 font-bold text-sm">30,000.00 USD</span>
+                <i data-lucide="menu" class="w-4 h-4 text-gray-400"></i>
+            </div>
+            <button class="bg-[#2c2d35] p-1 rounded-md"><i data-lucide="x" class="w-5 h-5 text-gray-400"></i></button>
+        </div>
+    </nav>
+
+    <div class="flex-1 flex overflow-hidden p-2 gap-2">
+        
+        <aside class="w-72 bg-[#1b1c21] rounded-xl flex flex-col border border-gray-800 overflow-hidden">
+            <div class="p-2 flex gap-1 bg-[#141518]">
+                <button class="flex-1 bg-[#2c2d35] text-[10px] py-1.5 rounded-full font-bold uppercase">All Bets</button>
+                <button class="flex-1 text-gray-500 text-[10px] py-1.5 font-bold uppercase">Previous</button>
+                <button class="flex-1 text-gray-500 text-[10px] py-1.5 font-bold uppercase">Top</button>
+            </div>
+            
+            <div class="px-4 py-2 flex justify-between items-end border-b border-gray-800">
+                <div>
+                    <div class="text-[10px] text-gray-500 uppercase font-bold">655/666</div>
+                    <div class="text-[10px] text-gray-400">Bets</div>
+                </div>
+                <div class="text-right">
+                    <div class="text-white font-bold text-sm">0.00</div>
+                    <div class="text-[9px] text-gray-500 uppercase">Total win USD</div>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto custom-scroll">
+                <table class="w-full text-[11px]">
+                    <thead class="bg-[#1b1c21] text-gray-500 uppercase text-[9px] sticky top-0">
+                        <tr>
+                            <th class="p-2 font-medium">Player</th>
+                            <th class="p-2 font-medium">Bet USD</th>
+                            <th class="p-2 font-medium">X</th>
+                            <th class="p-2 font-medium text-right">Win USD</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bet-list">
+                        </tbody>
+                </table>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col gap-2">
+            
+            <div class="h-8 flex items-center gap-2 px-2 overflow-hidden bg-[#000] rounded-lg border border-gray-900">
+                <span class="history-pill text-blue-400 bg-blue-900/20">1.03x</span>
+                <span class="history-pill text-purple-400 bg-purple-900/20">2.41x</span>
+                <span class="history-pill text-blue-400 bg-blue-900/20">1.04x</span>
+                <span class="history-pill text-pink-500 bg-pink-900/20">59.15x</span>
+                <span class="history-pill text-blue-400 bg-blue-900/20">1.77x</span>
+                <span class="history-pill text-purple-400 bg-purple-900/20">2.28x</span>
+                <span class="history-pill text-pink-500 bg-pink-900/20">8.88x</span>
+            </div>
+
+            <div class="flex-1 aviator-game-area rounded-2xl overflow-hidden border border-gray-800 flex items-center justify-center relative">
+                <div class="absolute top-0 w-full bg-orange-500/90 text-black text-[10px] text-center font-black py-0.5 uppercase tracking-tighter">
+                    Fun Mode
+                </div>
+
+                <div id="main-multiplier" class="text-8xl font-black z-10 drop-shadow-2xl">
+                    1.00x
+                </div>
+
+                <svg class="absolute inset-0 w-full h-full pointer-events-none">
+                    <path id="curve" d="" fill="rgba(209, 28, 51, 0.4)" stroke="#d11c33" stroke-width="4" />
+                </svg>
+                <div id="plane" class="absolute opacity-0">
+                    <img src="https://img.icons8.com/color/96/fighter-jet.png" class="w-20 h-20 -rotate-12 vibrate" style="filter: hue-rotate(320deg) brightness(0.8) saturate(5);">
+                </div>
+
+                <div id="crash-message" class="absolute inset-0 bg-black/70 flex flex-col items-center justify-center z-20 hidden">
+                    <span class="text-red-600 font-black text-5xl italic uppercase">Flew Away!</span>
+                    <span id="final-mult" class="text-white text-6xl font-black">2.45x</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-[#25272d] p-3 rounded-2xl border border-gray-700">
+                    <div class="flex justify-center gap-6 text-[10px] font-bold text-gray-500 uppercase mb-2">
+                        <span class="text-white border-b-2 border-red-600">Bet</span>
+                        <span>Auto</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <div class="flex-1">
+                            <div class="bg-black rounded-full flex items-center px-3 py-1.5 border border-gray-800 mb-2">
+                                <button class="text-gray-500 text-lg">−</button>
+                                <input type="text" value="1.00" class="w-full bg-transparent text-center font-bold text-sm outline-none">
+                                <button class="text-gray-500 text-lg">+</button>
+                            </div>
+                            <div class="grid grid-cols-2 gap-1">
+                                <button class="bg-black/50 text-[10px] py-1 rounded-md border border-gray-800">1</button>
+                                <button class="bg-black/50 text-[10px] py-1 rounded-md border border-gray-800">2</button>
+                                <button class="bg-black/50 text-[10px] py-1 rounded-md border border-gray-800">5</button>
+                                <button class="bg-black/50 text-[10px] py-1 rounded-md border border-gray-800">10</button>
+                            </div>
+                        </div>
+                        <button onclick="placeBet(this)" class="flex-1 bg-[#28a745] hover:bg-[#218838] rounded-xl flex flex-col items-center justify-center transition-all shadow-lg active:scale-95">
+                            <span class="uppercase font-black text-lg leading-tight">Bet</span>
+                            <span class="text-xs font-bold">1.00 USD</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-[#25272d] p-3 rounded-2xl border border-gray-700">
+                    <div class="flex justify-center gap-6 text-[10px] font-bold text-gray-500 uppercase mb-2">
+                        <span class="text-white border-b-2 border-red-600">Bet</span>
+                        <span>Auto</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <div class="flex-1">
+                            <div class="bg-black rounded-full flex items-center px-3 py-1.5 border border-gray-800 mb-2">
+                                <button class="text-gray-500 text-lg">−</button>
+                                <input type="text" value="1.00" class="w-full bg-transparent text-center font-bold text-sm outline-none">
+                                <button class="text-gray-500 text-lg">+</button>
+                            </div>
+                            <div class="grid grid-cols-2 gap-1">
+                                <button class="bg-black/50 text-[10px] py-1 rounded-md border border-gray-800">1</button>
+                                <button class="bg-black/50 text-[10px] py-1 rounded-md border border-gray-800">2</button>
+                                <button class="bg-black/50 text-[10px] py-1 rounded-md border border-gray-800">5</button>
+                                <button class="bg-black/50 text-[10px] py-1 rounded-md border border-gray-800">10</button>
+                            </div>
+                        </div>
+                        <button onclick="placeBet(this)" class="flex-1 bg-[#28a745] hover:bg-[#218838] rounded-xl flex flex-col items-center justify-center transition-all shadow-lg active:scale-95">
+                            <span class="uppercase font-black text-lg leading-tight">Bet</span>
+                            <span class="text-xs font-bold">1.00 USD</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        let multiplier = 1.0;
+        let isRunning = false;
+        let startTime = 0;
+        let crashPoint = 0;
+        
+        const display = document.getElementById('main-multiplier');
+        const plane = document.getElementById('plane');
+        const curve = document.getElementById('curve');
+        const crashScreen = document.getElementById('crash-message');
+        const finalMultText = document.getElementById('final-mult');
+        const betList = document.getElementById('bet-list');
+
+        // Populate sidebar with fake players
+        const mockPlayers = () => {
+            const names = ['p***1', 'a***0', 's***2', 'd***4', 'k***9'];
+            for(let i=0; i<25; i++) {
+                betList.innerHTML += `
+                <tr class="border-b border-gray-800/40">
+                    <td class="p-2 flex items-center gap-2 text-gray-400">
+                        <div class="w-5 h-5 bg-gradient-to-br from-gray-600 to-gray-800 rounded-full border border-gray-700"></div>
+                        ${names[Math.floor(Math.random()*names.length)]}
+                    </td>
+                    <td class="p-2 font-bold text-gray-300">100.00</td>
+                    <td class="p-2 text-gray-500">-</td>
+                    <td class="p-2 text-gray-500 text-right">-</td>
+                </tr>`;
+            }
+        }
+        mockPlayers();
+
+        function updateGame() {
+            if (!isRunning) return;
+            const elapsed = (Date.now() - startTime) / 1000;
+            multiplier = Math.pow(1.15, elapsed); 
+
+            if (multiplier >= crashPoint) {
+                endGame();
+                return;
+            }
+
+            display.innerText = multiplier.toFixed(2) + 'x';
+            
+            // Curve Math
+            const rect = plane.parentElement.getBoundingClientRect();
+            const x = (elapsed / 12) * rect.width;
+            const y = Math.pow(elapsed / 12, 2) * rect.height;
+
+            plane.style.opacity = "1";
+            plane.style.left = `${x}px`;
+            plane.style.bottom = `${y}px`;
+            
+            // Draw the SVG path to follow plane
+            curve.setAttribute('d', `M 0 ${rect.height} Q ${x*0.5} ${rect.height}, ${x} ${rect.height - y} L ${x} ${rect.height} L 0 ${rect.height} Z`);
+
+            requestAnimationFrame(updateGame);
+        }
+
+        function startGame() {
+            isRunning = true;
+            startTime = Date.now();
+            crashPoint = (Math.random() * 5 + 1).toFixed(2);
+            crashScreen.classList.add('hidden');
+            updateGame();
+        }
+
+        function endGame() {
+            isRunning = false;
+            finalMultText.innerText = multiplier.toFixed(2) + 'x';
+            crashScreen.classList.remove('hidden');
+            setTimeout(() => {
+                curve.setAttribute('d', '');
+                plane.style.opacity = '0';
+                display.innerText = '1.00x';
+                startGame();
+            }, 3000);
+        }
+
+        function placeBet(btn) {
+            btn.classList.replace('bg-[#28a745]', 'bg-orange-500');
+            btn.innerHTML = `<span class="uppercase font-black text-lg">Waiting</span>`;
+        }
+
+        setTimeout(startGame, 1000);
+    </script>
+</body>
+</html>

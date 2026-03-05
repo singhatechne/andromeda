@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiksemi Casino - European Roulette</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'table-green': '#234f3b',
+                        'table-border': '#163327',
+                        'casino-gold': '#ffb703',
+                        'casino-dark': '#1a1d23',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .roulette-grid { display: grid; grid-template-rows: repeat(3, 1fr); grid-auto-flow: column; gap: 2px; background: #163327; padding: 2px; border: 4px solid #163327; border-radius: 4px; }
+        .cell { display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; transition: filter 0.2s; position: relative; min-height: 50px; border-radius: 2px; }
+        .cell:hover { filter: brightness(1.3); }
+        .cell-red { background: #d00000; }
+        .cell-black { background: #1a1a1a; }
+        .cell-green { background: #38b000; }
+        .chip { width: 22px; height: 22px; border-radius: 50%; border: 2px dashed rgba(255,255,255,0.8); position: absolute; z-index: 10; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 900; background: #ffb703; color: black; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        #wheel-container { perspective: 1000px; }
+        #wheel-canvas { transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
+    </style>
+</head>
+<body class="bg-casino-dark text-white font-sans min-h-screen flex flex-col select-none">
+
+    <header class="bg-black/40 p-4 flex justify-between items-center border-b border-white/5">
+        <div class="flex gap-4">
+            <div class="bg-gray-800/80 px-4 py-1 rounded text-xs border border-white/10">
+                <span class="text-gray-400">MIN BET:</span> <span class="font-bold">500</span>
+            </div>
+            <div class="bg-gray-800/80 px-4 py-1 rounded text-xs border border-white/10">
+                <span class="text-gray-400">MAX BET:</span> <span class="font-bold">10K</span>
+            </div>
+        </div>
+        <div class="flex flex-col items-end">
+            <span class="text-[10px] text-gray-400 uppercase tracking-widest">Balance</span>
+            <span id="balance" class="text-xl font-black text-casino-gold">$100,000.00</span>
+        </div>
+    </header>
+
+    <main class="flex-1 flex flex-col items-center justify-center p-6 gap-10">
+        <div id="wheel-container" class="relative group">
+            <div id="wheel-pointer" class="absolute -top-4 left-1/2 -translate-x-1/2 z-20 text-3xl">▼</div>
+            <canvas id="wheel-canvas" width="360" height="360" class="rounded-full shadow-[0_0_50px_rgba(0,0,0,0.5)]"></canvas>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <div class="bg-casino-dark w-20 h-20 rounded-full border-4 border-casino-gold flex flex-col items-center justify-center z-10 shadow-inner">
+                    <span id="winDisplay" class="text-3xl font-black">--</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full max-w-5xl space-y-2">
+            <div class="flex h-[156px]">
+                <div class="cell cell-green w-16 h-full text-xl" data-bet="0">0</div>
+                <div id="rouletteGrid" class="roulette-grid flex-1"></div>
+            </div>
+            
+            <div class="grid grid-cols-6 gap-2 h-12 text-[10px] font-bold uppercase">
+                <div class="cell bg-table-green border border-white/10" data-bet="1st12">1st 12</div>
+                <div class="cell bg-table-green border border-white/10" data-bet="2nd12">2nd 12</div>
+                <div class="cell bg-table-green border border-white/10" data-bet="3rd12">3rd 12</div>
+                <div class="cell bg-table-green border border-white/10" data-bet="low">1-18</div>
+                <div class="cell bg-table-green border border-white/10" data-bet="even">Even</div>
+                <div class="cell bg-table-green border border-white/10" data-bet="odd">Odd</div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-black/60 backdrop-blur-md p-6 flex flex-wrap justify-center items-center gap-6 border-t border-white/10">
+        <div class="flex gap-3" id="chipSelection">
+            <button class="w-12 h-12 rounded-full bg-blue-600 border-2 border-white font-black hover:scale-110 transition active:ring-4 ring-blue-400" data-val="100">100</button>
+            <button class="w-12 h-12 rounded-full bg-red-600 border-2 border-white font-black hover:scale-110 transition active:ring-4 ring-red-400" data-val="500">500</button>
+            <button class="w-12 h-12 rounded-full bg-purple-600 border-2 border-white font-black hover:scale-110 transition active:ring-4 ring-purple-400" data-val="1000">1K</button>
+            <button class="w-12 h-12 rounded-full bg-orange-500 border-2 border-white font-black hover:scale-110 transition active:ring-4 ring-orange-300 ring-offset-black" data-val="5000">5K</button>
+        </div>
+
+        <div class="h-10 w-[1px] bg-white/10 hidden md:block"></div>
+
+        <div class="flex gap-2">
+            <button id="clearBtn" class="px-6 py-2 bg-gray-800 hover:bg-gray-700 rounded font-bold text-xs uppercase transition">Clear</button>
+            <button id="spinBtn" class="px-12 py-2 bg-casino-gold text-black rounded font-black uppercase tracking-tighter hover:brightness-110 transition transform active:scale-95 disabled:opacity-50 disabled:grayscale">Spin Table</button>
+        </div>
+
+        <div class="text-right min-w-[100px]">
+            <span class="text-[10px] text-gray-500 block">TOTAL BET</span>
+            <span id="totalBet" class="text-xl font-bold">$0</span>
+        </div>
+    </footer>
+
+    <script>
+        const numbers = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
+        const redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+        
+        let balance = 100000;
+        let selectedChip = 100;
+        let bets = {};
+        let isSpinning = false;
+
+        // Initialize Table
+        const grid = document.getElementById('rouletteGrid');
+        for (let i = 1; i <= 36; i++) {
+            const cell = document.createElement('div');
+            const color = redNumbers.includes(i) ? 'cell-red' : 'cell-black';
+            cell.className = `cell ${color}`;
+            cell.dataset.bet = i;
+            cell.innerText = i;
+            grid.appendChild(cell);
+        }
+
+        // Draw Wheel
+        const canvas = document.getElementById('wheel-canvas');
+        const ctx = canvas.getContext('2d');
+        function drawWheel() {
+            const centerX = 180, centerY = 180;
+            const slice = (Math.PI * 2) / 37;
+            numbers.forEach((num, i) => {
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate(i * slice - (Math.PI / 2 + slice / 2));
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.arc(0, 0, 170, 0, slice);
+                ctx.fillStyle = num === 0 ? '#38b000' : (redNumbers.includes(num) ? '#d00000' : '#1a1a1a');
+                ctx.fill();
+                ctx.strokeStyle = '#444';
+                ctx.stroke();
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 12px Inter';
+                ctx.fillText(num, 140, slice / 2 + 5);
+                ctx.restore();
+            });
+        }
+        drawWheel();
+
+        // Bet Logic
+        document.querySelectorAll('.cell').forEach(cell => {
+            cell.addEventListener('click', () => {
+                if (isSpinning) return;
+                const type = cell.dataset.bet;
+                bets[type] = (bets[type] || 0) + selectedChip;
+                updateChips(cell, bets[type]);
+                updateTotal();
+            });
+        });
+
+        function updateChips(parent, amount) {
+            let chip = parent.querySelector('.chip');
+            if (!chip) {
+                chip = document.createElement('div');
+                chip.className = 'chip';
+                parent.appendChild(chip);
+            }
+            chip.innerText = amount >= 1000 ? (amount / 1000) + 'K' : amount;
+        }
+
+        function updateTotal() {
+            const total = Object.values(bets).reduce((a, b) => a + b, 0);
+            document.getElementById('totalBet').innerText = `$${total}`;
+        }
+
+        document.getElementById('chipSelection').addEventListener('click', (e) => {
+            if (e.target.dataset.val) {
+                selectedChip = parseInt(e.target.dataset.val);
+                document.querySelectorAll('#chipSelection button').forEach(b => b.classList.remove('ring-4', 'ring-white/50'));
+                e.target.classList.add('ring-4', 'ring-white/50');
+            }
+        });
+
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            if (isSpinning) return;
+            bets = {};
+            document.querySelectorAll('.chip').forEach(c => c.remove());
+            updateTotal();
+        });
+
+        // Spin Logic
+        document.getElementById('spinBtn').addEventListener('click', () => {
+            const totalBet = Object.values(bets).reduce((a, b) => a + b, 0);
+            if (isSpinning || totalBet === 0 || totalBet > balance) return;
+
+            isSpinning = true;
+            balance -= totalBet;
+            document.getElementById('balance').innerText = `$${balance.toLocaleString()}.00`;
+            
+            const randomStop = Math.floor(Math.random() * 360) + (360 * 5); // at least 5 full spins
+            canvas.style.transform = `rotate(${randomStop}deg)`;
+
+            setTimeout(() => {
+                const finalRotation = randomStop % 360;
+                const sliceDegree = 360 / 37;
+                // Calculate which number landed at the 12 o'clock position (pointer)
+                const winningIndex = Math.floor(((360 - finalRotation + (sliceDegree / 2)) % 360) / sliceDegree);
+                const winNum = numbers[winningIndex];
+                
+                document.getElementById('winDisplay').innerText = winNum;
+                processWin(winNum);
+                isSpinning = false;
+                canvas.style.transition = 'none';
+                canvas.style.transform = `rotate(${finalRotation}deg)`;
+                setTimeout(() => canvas.style.transition = 'transform 4s cubic-bezier(0.15, 0, 0.15, 1)', 50);
+            }, 4000);
+        });
+
+        function processWin(num) {
+            let winAmount = 0;
+            for (let [type, amt] of Object.entries(bets)) {
+                if (type == num) winAmount += amt * 36;
+                if (type === 'even' && num % 2 === 0 && num !== 0) winAmount += amt * 2;
+                if (type === 'odd' && num % 2 !== 0) winAmount += amt * 2;
+                if (type === 'low' && num >= 1 && num <= 18) winAmount += amt * 2;
+                if (type === '1st12' && num >= 1 && num <= 12) winAmount += amt * 3;
+                if (type === '2nd12' && num >= 13 && num <= 24) winAmount += amt * 3;
+                if (type === '3rd12' && num >= 25 && num <= 36) winAmount += amt * 3;
+            }
+            balance += winAmount;
+            document.getElementById('balance').innerText = `$${balance.toLocaleString()}.00`;
+            if (winAmount > 0) alert(`Winner! You won $${winAmount}`);
+        }
+    </script>
+</body>
+</html>

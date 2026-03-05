@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Andromeda Gaming – offers & promotions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Archivo:wght@800;900&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ----- base & reset ----- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #0b0a0c;
+            font-family: 'Inter', sans-serif;
+            color: white;
+            overflow-x: hidden;
+            width: 100%;
+        }
+        /* header original style (exact) */
+        header.fixed {
+            background: rgba(15, 11, 21, 0.8) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* ----- CASINO BACKGROUNDS PER SECTION (all different, high quality) ----- */
+        .section-bg {
+            position: relative;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        /* main wrapper subtle pattern (already dark) */
+        .main-casino-bg {
+            background-image: url('assets/back.jpg');
+            background-attachment: fixed; /* optional depth */
+        }
+        /* hero section background */
+        .hero-bg {
+            background-image: url(''); /* chips & dice */
+        }
+        /* tasks section background */
+        .tasks-bg {
+            background-image: url(''); /* slot machines */
+        }
+        /* offers section background */
+        .offers-bg {
+            background-image: url(''); /* casino hall */
+        }
+        /* table & rules section background */
+        .table-bg {
+            background-image: url(''); /* poker & mobile */
+        }
+        /* download strip background */
+        .download-strip-bg {
+            background-image: url(''); /* neon casino */
+        }
+
+        /* universal dark overlay (keeps text readable, adds cinematic feel) */
+        .overlay-dark::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(145deg, rgba(11,10,12,0.85), rgba(45,27,77,0.8));
+            backdrop-filter: blur(3px);
+            pointer-events: none;
+            z-index: 1;
+            border-radius: inherit;
+        }
+        .overlay-dark > * {
+            position: relative;
+            z-index: 5;
+        }
+
+        /* card overlays for inner content */
+        .card-overlay {
+            position: relative;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            border-radius: inherit;
+        }
+
+        /* rule card with left accent */
+        .rule-card-accent {
+            background: rgba(22, 17, 30, 0.8);
+            backdrop-filter: blur(6px);
+            border-left: 6px solid #d8ff5b;
+            border-radius: 40px;
+            box-shadow: 0 20px 30px -10px black, 0 0 0 1px #c5a3ff inset;
+        }
+
+        /* offer cards with distinct casino background (each can have own but we unify) */
+        .offer-card {
+            position: relative;
+            border-radius: 36px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 20px 30px -10px #000, 0 0 0 1px #c5a3ff;
+            background-image: url('https://images.unsplash.com/photo-1601370690183-1c7796ecec61?q=80&w=2070&auto=format&fit=crop'); /* common casino */
+            background-size: cover;
+            background-position: center;
+        }
+        .offer-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(145deg, rgba(45,27,77,0.9), rgba(11,10,12,0.95));
+            backdrop-filter: blur(2px);
+            z-index: 1;
+        }
+        .offer-card > * {
+            position: relative;
+            z-index: 5;
+        }
+        .offer-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: #d8ff5b;
+            box-shadow: 0 30px 40px -12px #c5a3ff, 0 0 0 2px #d8ff5b inset;
+        }
+
+        .sticker-free {
+            background: #d8ff5b;
+            color: #0b0a0c;
+            font-weight: 900;
+            padding: 4px 16px;
+            border-radius: 40px;
+            display: inline-block;
+            font-size: clamp(0.7rem, 3vw, 0.9rem);
+            box-shadow: 0 0 20px #d8ff5b;
+        }
+
+        /* download badges – fully clickable, good contrast */
+        .download-badge {
+            background: rgba(26, 26, 34, 0.8);
+            backdrop-filter: blur(4px);
+            border: 1px solid #c5a3ff;
+            border-radius: 100px;
+            padding: 0.7rem 1rem;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+            font-size: clamp(0.75rem, 2.5vw, 0.9rem);
+        }
+        .download-badge:hover {
+            background: #2d1b4d;
+            border-color: #d8ff5b;
+            transform: scale(1.03);
+            box-shadow: 0 0 30px #c5a3ff;
+        }
+        .download-badge i {
+            color: #d8ff5b;
+            font-size: 1.3rem;
+        }
+
+        /* multiplier table – fully responsive */
+        .multiplier-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: clamp(0.7rem, 2.5vw, 0.9rem);
+        }
+        .multiplier-table th {
+            background: #2d1b4d;
+            color: #d8ff5b;
+            font-weight: 800;
+            padding: 10px 4px;
+            text-align: center;
+            border: 1px solid #c5a3ff;
+        }
+        .multiplier-table td {
+            padding: 8px 4px;
+            border: 1px solid #c5a3ff;
+            text-align: center;
+            color: white;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(2px);
+        }
+        .multiplier-table tr:nth-child(even) td {
+            background: rgba(45,27,77,0.5);
+        }
+
+        .font-heading { font-family: 'Orbitron', sans-serif; }
+
+        
+        .social-icon {
+            width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 24px; color: white; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .social-icon.messenger { background: linear-gradient(135deg, #00B2FF, #006AFF); }
+        .social-icon.whatsapp { background: linear-gradient(135deg, #25D366, #128C7E); }
+        .social-icon.telegram { background: linear-gradient(135deg, #0088cc, #005c99); }
+        .social-icon.instagram { background: linear-gradient(45deg, #f09433, #d62976, #962fbf, #4f5bd5); }
+        @media (max-width: 768px) { .social-icon { width: 40px; height: 40px; font-size: 20px; } }
+
+        /* footer social (original) */
+        .social-circle {
+            width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0.4; transition: opacity 0.2s;
+        }
+        .social-circle:hover { opacity: 1; }
+
+        /* misc responsive */
+        .container-padding { padding-left: clamp(1rem, 4vw, 2rem); padding-right: clamp(1rem, 4vw, 2rem); }
+        h1, h2, h3 { word-break: break-word; }
+
+        .full-width-section {
+            width: 100vw;
+            position: relative;
+            left: 50%;
+            right: 50%;
+            margin-left: -50vw;
+            margin-right: -50vw;
+        }
+    </style>
+</head>
+<body class="antialiased main-casino-bg section-bg"> <!-- subtle fixed casino background behind everything -->
+
+    
+
+    <!-- ORIGINAL HEADER (exact copy from homepage) -->
+    <header class="fixed top-0 left-0 w-full z-50 bg-cb-dark/60 backdrop-blur-md px-4 lg:px-10 py-4 flex items-center justify-between border-b border-white/5" style="background: rgba(15, 11, 21, 0.6) !important; backdrop-filter: blur(8px) !important;">
+        <a href="index.html" class="flex items-center gap-2 cursor-pointer group">
+            <div class="flex gap-0.5">
+                <span class="w-1.5 h-6 bg-white/30 rounded-full group-hover:bg-white transition-colors"></span>
+                <span class="w-1.5 h-6 bg-white/60 rounded-full group-hover:bg-white transition-colors"></span>
+                <span class="w-1.5 h-6 bg-white rounded-full"></span>
+            </div>
+            <span class="text-2xl font-black tracking-tighter italic">Andromeda Gaming</span>
+            <div class="flex gap-0.5 transform scale-x-[-1]">
+                <span class="w-1.5 h-6 bg-white/30 rounded-full group-hover:bg-white transition-colors"></span>
+                <span class="w-1.5 h-6 bg-white/60 rounded-full group-hover:bg-white transition-colors"></span>
+                <span class="w-1.5 h-6 bg-white rounded-full"></span>
+            </div>
+        </a>
+        <nav class="hidden lg:flex absolute left-1/2 transform -translate-x-1/2 items-center gap-6 text-sm font-semibold text-white/70">
+            <a href="slots.html" class="hover:text-white transition-colors">Slots</a>
+            <a href="crash.html" class="hover:text-white transition-colors">Arcade</a>
+            <a href="roulette.html" class="hover:text-white transition-colors">Fishing</a>
+            <a href="aviator.html" class="hover:text-white transition-colors">Crash</a>
+            <a href="games.html" class="hover:text-white transition-colors">Games</a>
+            <a href="rules.html" class="hover:text-white transition-colors">Promotions</a>
+        </nav>
+        <div class="flex items-center gap-3">
+            <button class="px-4 md:px-6 py-2 bg-[#c5a3ff] text-black rounded-full text-xs md:text-sm font-bold hover:brightness-110 transition-all shadow-[0_0_20px_rgba(197,163,255,0.3)]">PLAY NOW</button>
+            <button class="lg:hidden p-2 text-white">
+                <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT – each section gets its own casino background + overlay -->
+    <main class="w-full pt-28 md:pt-36 px-3 sm:px-4 md:px-6 pb-20 relative">
+
+        <!-- 1️⃣ HERO SECTION (unique casino background) -->
+        <div class="hero-bg section-bg overlay-dark rounded-[32px] md:rounded-[48px] mb-12 md:mb-16  p-6 md:p-12 shadow-2xl">
+            <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div>
+                    <span class="sticker-free mb-4 inline-block">🙏 LIMITED TIME</span>
+                    <h1 class="text-4xl sm:text-5xl md:text-6xl font-heading font-black uppercase tracking-tight leading-tight">
+                        Welcome <span class="text-[#ff7a2f]" style="text-shadow:0 0 10px #ff7a2f;">$5 Freeplay</span>
+                    </h1>
+                    <p class="text-lg md:text-xl text-[#c5a3ff] mt-2 font-semibold">complete tasks → 50 game credits ($5) + 10% cash on extra credits</p>
+                </div>
+                <div class="bg-black/70 backdrop-blur-md rounded-3xl border border-[#d8ff5b]/60 p-4 md:p-6 max-w-sm shadow-[0_0_40px_#d8ff5b]">
+                    <p class="text-sm text-white/90">minimum cashout 50 credits = $5 · above 50 we pay 10% 🥰💸</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3️⃣ OFFERS GRID (separate background) - FULL WIDTH -->
+        <div class="offers-bg section-bg overlay-dark full-width-section mb-16 md:mb-20 py-6 md:py-8 px-4 md:px-6 ">
+            <div class="max-w-7xl mx-auto"> <!-- Add this container to keep content centered -->
+                <h2 class="text-3xl md:text-5xl font-black uppercase mb-8 flex items-center gap-4"><i class="fa-solid fa-gift text-[#ff7a2f] text-3xl md:text-5xl animate-pulse"></i> 🔥 current offers</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 relative z-10">
+                    <!-- cards (all offer-card have built-in casino background) -->
+                    <div class="offer-card p-6 md:p-8 flex flex-col">
+                        <div class="text-4xl md:text-5xl mb-4">🎁</div>
+                        <h3 class="text-2xl md:text-3xl font-black mb-1">100%</h3>
+                        <p class="text-lg md:text-xl font-bold text-[#d8ff5b] uppercase tracking-wide">Sign Up Bonus</p>
+                        <p class="mt-4 text-white/80 text-xs md:text-sm">match on first deposit · auto</p>
+                        <div class="mt-6 bg-black/60 rounded-full py-2 px-3 text-center text-xs font-mono border border-[#c5a3ff]">code: ANDROMEDA100</div>
+                    </div>
+                    <div class="offer-card p-6 md:p-8 flex flex-col">
+                        <div class="text-4xl md:text-5xl mb-4">🔄</div>
+                        <h3 class="text-2xl md:text-3xl font-black mb-1">40–50%</h3>
+                        <p class="text-lg md:text-xl font-bold text-[#ff7a2f] uppercase tracking-wide">Reload Bonus</p>
+                        <p class="mt-4 text-white/80 text-xs md:text-sm">every reload, 40‑50% extra</p>
+                        <div class="mt-6 bg-black/60 rounded-full py-2 px-3 text-xs border border-[#c5a3ff]">min $20 · max $200</div>
+                    </div>
+                    <div class="offer-card p-6 md:p-8 flex flex-col">
+                        <div class="text-4xl md:text-5xl mb-4">5️⃣🎰</div>
+                        <h3 class="text-2xl md:text-3xl font-black mb-1">100%</h3>
+                        <p class="text-lg md:text-xl font-bold text-[#d8ff5b] uppercase tracking-wide">Every 5th Reload</p>
+                        <p class="mt-4 text-white/80 text-xs md:text-sm">double your load every 5th deposit</p>
+                        <div class="mt-6 bg-black/60 rounded-full py-2 px-3 text-xs border border-[#c5a3ff]">automatically applied</div>
+                    </div>
+                    <div class="offer-card p-6 md:p-8 flex flex-col">
+                        <div class="text-4xl md:text-5xl mb-4">👥</div>
+                        <h3 class="text-2xl md:text-3xl font-black mb-1">50%</h3>
+                        <p class="text-lg md:text-xl font-bold text-[#c5a3ff] uppercase tracking-wide">Referral Bonus</p>
+                        <p class="mt-4 text-white/80 text-xs md:text-sm">50% of friend's first deposit</p>
+                        <div class="mt-6 bg-black/60 rounded-full py-2 px-3 text-xs border border-[#c5a3ff]">uncapped</div>
+                    </div>
+                    <div class="offer-card p-6 md:p-8 flex flex-col">
+                        <div class="text-4xl md:text-5xl mb-4">🌙✨</div>
+                        <h3 class="text-2xl md:text-3xl font-black mb-1">100%</h3>
+                        <p class="text-lg md:text-xl font-bold text-[#ff7a2f] uppercase tracking-wide">weekend special</p>
+                        <p class="mt-4 text-white/80 text-xs md:text-sm">load above $30 → 100% bonus</p>
+                        <div class="mt-6 bg-black/60 rounded-full py-2 px-3 text-xs border border-[#c5a3ff]">fri-sun</div>
+                    </div>
+                    <div class="offer-card bg-gradient-to-br from-[#2d1b4d] to-[#16111e] p-6 md:p-8 flex flex-col items-center justify-center text-center">
+                        <i class="fa-solid fa-circle-check text-3xl md:text-4xl text-[#d8ff5b] mb-3"></i>
+                        <span class="font-black text-xl md:text-2xl">$5 FREEPLAY</span>
+                        <span class="text-white/80 text-xs md:text-sm">complete tasks above</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2️⃣ TASKS + DOWNLOAD SECTION (different background) -->
+        <div class="tasks-bg section-bg  w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] mb-16 md:mb-20 p-6 md:p-8" style="opacity: 1;">
+            <div class="grid lg:grid-cols-3 gap-6 md:gap-8 relative z-10">
+                <!-- left large rule card -->
+                <div class="lg:col-span-2 rule-card-accent p-6 md:p-8 border-2 border-[#c5a3ff] shadow-[0_20px_40px_-10px_#d8ff5b]">
+                    <div class="flex items-center gap-3 mb-6 md:mb-8">
+                        <i class="fa-solid fa-list-check text-2xl md:text-3xl text-[#d8ff5b]"></i>
+                        <h2 class="text-2xl md:text-3xl font-black uppercase tracking-wide">🙏 welcome freeplay rules</h2>
+                    </div>
+                    <ul class="space-y-4 text-sm md:text-base text-white/90">
+                        <li class="flex gap-3"><span class="text-[#c5a3ff] font-black text-lg md:text-xl">1.</span> Leave a like and review on our Facebook page.</li>
+                        <li class="flex gap-3"><span class="text-[#c5a3ff] font-black text-lg md:text-xl">2.</span> Like, comment & share our recent post in <span class="font-bold text-white">5 gaming groups</span>.</li>
+                        <li class="flex gap-3"><span class="text-[#c5a3ff] font-black text-lg md:text-xl">3.</span> Invite at least 10 friends to our group: <a href="#" class="text-[#d8ff5b] underline break-all text-sm">facebook.com/groups/263503533029174</a></li>
+                        <li class="flex gap-3"><span class="text-[#c5a3ff] font-black text-lg md:text-xl">4.</span> Share our recent post on your timeline and tag at least 10 friends.</li>
+                    </ul>
+                    <div class="mt-6 md:mt-8 bg-[#1a1a22]/90 border border-[#d8ff5b] rounded-2xl md:rounded-3xl p-4 md:p-6 flex flex-wrap items-center gap-4 shadow-inner">
+                        <i class="fa-solid fa-camera text-2xl md:text-3xl text-[#ff7a2f]"></i>
+                        <span class="font-bold text-base md:text-xl">📸 Send screenshot of every step</span>
+                        <span class="md:ml-auto bg-[#ff7a2f] text-black px-4 md:px-6 py-2 md:py-3 rounded-full font-black text-xs md:text-sm shadow-lg shadow-[#ff7a2f]/50">BONUS: $5 FREEPLAY</span>
+                    </div>
+                    <p class="text-xs text-white/40 mt-4 italic">* 50 game credits = $5 freeplay · above 50 credits = 10% extra.</p>
+                </div>
+
+                <!-- right download panel with clickable links -->
+                <div class="bg-black/60 backdrop-blur-md rounded-[32px] md:rounded-[40px] p-6 md:p-8  shadow-2xl">
+                    <h3 class="text-xl md:text-2xl font-black mb-6 flex items-center gap-2 text-[#d8ff5b]"><i class="fa-solid fa-download"></i> DOWNLOAD LINKS</h3>
+                    <div class="grid grid-cols-1 gap-3 max-h-[500px] overflow-y-auto pr-2">
+                        <a href="https://m.lasvegassweeps.com" target="_blank" class="download-badge"><i class="fa-brands fa-google-play"></i> Las Vegas Sweeps</a>
+                        <a href="https://dl.juwa777.com/" target="_blank" class="download-badge"><i class="fa-brands fa-app-store"></i> Juwa</a>
+                        <a href="https://download.gamevault999.com" target="_blank" class="download-badge"><i class="fa-solid fa-dice-d6"></i> Gamevault</a>
+                        <a href="https://milkywayapp.xyz" target="_blank" class="download-badge"><i class="fa-regular fa-star"></i> Milkyway</a>
+                        <a href="https://www.highrollerdownload.com" target="_blank" class="download-badge"><i class="fa-solid fa-rocket"></i> Highroller</a>
+                        <a href="https://pandamaster.vip:8888" target="_blank" class="download-badge"><i class="fa-solid fa-panda"></i> Pandamaster</a>
+                        <a href="http://firekirin.xyz:8580/index.html" target="_blank" class="download-badge"><i class="fa-solid fa-fire"></i> Firekirin</a>
+                        <a href="http://start.orionstars.vip:8580/index.html" target="_blank" class="download-badge"><i class="fa-solid fa-galaxy"></i> Orionstars</a>
+                        <a href="http://dl.highstakesweeps.com" target="_blank" class="download-badge"><i class="fa-solid fa-crown"></i> Highstakes</a>
+                        <a href="http://play.magnum.casino" target="_blank" class="download-badge"><i class="fa-solid fa-magnifying-glass"></i> Magnum casino</a>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        
+
+        <!-- 4️⃣ RULES & MULTIPLIER TABLE (different background) - FULL WIDTH -->
+        <div class="table-bg section-bg overlay-dark full-width-section mb-16 md:mb-20 py-6 md:py-8 px-4 md:px-6 ">
+            <div class="max-w-7xl mx-auto"> <!-- Add this container to keep content centered -->
+                <div class="grid md:grid-cols-2 gap-6 md:gap-8 relative z-10">
+                    <!-- left rules card -->
+                    <div class="bg-black/70 backdrop-blur-md rounded-[32px] md:rounded-[48px] p-6 md:p-8 border-2 border-[#c5a3ff]">
+                        <div class="flex items-center gap-3 mb-6"><i class="fa-solid fa-scale-balanced text-2xl md:text-3xl text-[#ff7a2f]"></i><h2 class="text-2xl md:text-3xl font-black">📜 rules & regulations</h2></div>
+                        <ul class="space-y-3 text-white/90 list-disc list-inside marker:text-[#c5a3ff] text-xs md:text-sm">
+                            <li>One freeplay per user / IP / device.</li>
+                            <li>Tasks must be completed within 48h after joining.</li>
+                            <li>Screenshots required – send to official messenger.</li>
+                            <li>Freeplay credits expire after 7 days.</li>
+                            <li>Minimum withdrawal from winnings: $20 (crypto or cashapp).</li>
+                            <li>Bonus abuse results in permanent ban.</li>
+                            <li>All game downloads are third‑party; we only provide links.</li>
+                            <li>10% cash applies only on credits above the first 50.</li>
+                            <li>Weekend bonus cannot be combined with reload.</li>
+                        </ul>
+                        <div class="mt-8 p-4 bg-[#ff7a2f]/20 rounded-3xl border border-[#ff7a2f]/60"><p class="font-mono text-xs md:text-sm">📧 verification: andromeda@help (or telegram @andromedagaming)</p></div>
+                    </div>
+                    <!-- right multiplier table -->
+                    <div class="bg-black/70 backdrop-blur-md rounded-[32px] md:rounded-[48px] p-6 md:p-8 border-2 border-[#c5a3ff]">
+                        <div class="flex items-center gap-3 mb-6"><i class="fa-solid fa-table text-2xl md:text-3xl text-[#d8ff5b]"></i><span class="font-black text-xl md:text-2xl">💰 deposit multiplier & cashout</span></div>
+                        <div class="overflow-x-auto">
+                            <table class="multiplier-table min-w-[500px] md:min-w-full">
+                                <thead><tr><th>Deposit Range</th><th>Multiplier</th><th>Min</th><th>Max</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Less than $10</td><td>—</td><td>$50</td><td>$50</td></tr>
+                                    <tr><td>$10 – $20</td><td>3X</td><td>—</td><td>$120</td></tr>
+                                    <tr><td>$21 – $25</td><td>3X</td><td>—</td><td>$150</td></tr>
+                                    <tr><td>$26 – $30</td><td>3X</td><td>—</td><td>$180</td></tr>
+                                    <tr><td>$31 – $35</td><td>3X</td><td>—</td><td>$210</td></tr>
+                                    <tr><td>$36 – $40</td><td>3X</td><td>—</td><td>$240</td></tr>
+                                    <tr><td>$41 – $45</td><td>3X</td><td>—</td><td>$270</td></tr>
+                                    <tr><td>$46 – $50</td><td>3X</td><td>—</td><td>$300</td></tr>
+                                    <tr><td>$51 – $60</td><td>3X</td><td>—</td><td>$360</td></tr>
+                                    <tr><td>$61 – $80</td><td>3X</td><td>—</td><td>$480</td></tr>
+                                    <tr><td>$81 – $100</td><td>3X</td><td>—</td><td>$600</td></tr>
+                                    <tr><td>More than $100</td><td>3X</td><td>—</td><td>—</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-xs text-white/40 mt-6 italic">* 3x multiplier applies. For >$100 contact support.</p>
+                        <div class="mt-6 bg-[#0f0b15] p-4 rounded-3xl border border-[#c5a3ff]/50"><p class="font-bold mb-2 flex items-center gap-2"><i class="fa-brands fa-facebook text-blue-400"></i> Facebook group tasks reminder:</p><p class="text-xs md:text-sm text-white/80">like & review · share in 5 groups · invite 10 friends · tag 10</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ORIGINAL FOOTER (exact copy) -->
+    <footer class="bg-cb-dark pt-16 md:pt-20 pb-8 md:pb-10 px-4 md:px-6 border-t border-white/5" style="background:#0f0b15; opacity: 1;">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 mb-16 md:mb-20 text-xs">
+                <div><h4 class="font-black uppercase mb-4 md:mb-6 tracking-widest">Resources</h4><ul class="space-y-2 md:space-y-3 text-white/50"><li>Home</li><li>Games</li><li>Offers</li></ul></div>
+                <div><h4 class="font-black uppercase mb-4 md:mb-6 tracking-widest">Platforms</h4><ul class="space-y-2 md:space-y-3 text-white/50"><li>Orion Stars</li><li>Game Vault</li><li>Juwa</li><li>Gameroom</li><li>Vegas Sweeps</li><li>Panda Master</li><li>Milky Way</li><li>Fire Kirin</li></ul></div>
+                <div><h4 class="font-black uppercase mb-4 md:mb-6 tracking-widest">Games</h4><ul class="space-y-2 md:space-y-3 text-white/50"><li>Casino</li><li>Blackjack</li><li>Roulette</li><li>Slots</li><li>Table games</li><li>Crash</li><li>Fishing Games</li></ul></div>
+                <div><h4 class="font-black uppercase mb-4 md:mb-6 tracking-widest">Grand Slams</h4><ul class="space-y-2 md:space-y-3 text-white/50"><li>Dice</li><li>Temple Run</li><li>Shooter</li><li>Gambling</li><li>Black Jack</li><li>Magic Wheels</li></ul></div>
+            </div>
+            <div class="flex flex-col md:flex-row justify-between items-center pt-8 md:pt-10 border-t border-white/5 gap-6 md:gap-8">
+                <div class="flex gap-4 md:gap-6">
+                    <a href="#" class="social-circle" style="background:#1877F2;"><i class="fab fa-facebook-f text-white text-xs md:text-sm"></i></a>
+                    <a href="#" class="social-circle" style="background:linear-gradient(45deg,#f09433,#d62976,#962fbf,#4f5bd5);"><i class="fab fa-instagram text-white text-xs md:text-sm"></i></a>
+                    <a href="#" class="social-circle" style="background:#0088cc;"><i class="fab fa-telegram-plane text-white text-xs md:text-sm"></i></a>
+                    <a href="#" class="social-circle" style="background:#25D366;"><i class="fab fa-whatsapp text-white text-xs md:text-sm"></i></a>
+                    <a href="#" class="social-circle" style="background:#FF0000;"><i class="fab fa-youtube text-white text-xs md:text-sm"></i></a>
+                </div>
+                <div class="text-[9px] md:text-[10px] text-white/40 text-center md:text-right max-w-2xl">#1 global Casino Platform | Andromeda Gaming · offers & promotions<br></div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

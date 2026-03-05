@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casino Crash Game Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Essential styles that are tricky in utility-first CSS */
+        body {
+            background-color: #101115;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* SVG Animation keyframes for the rocket's fire */
+        @keyframes flicker {
+            0% { transform: scaleY(1); opacity: 0.9; }
+            50% { transform: scaleY(1.1) translateX(-1px); opacity: 1; }
+            100% { transform: scaleY(1); opacity: 0.9; }
+        }
+        #rocket-fire {
+            animation: flicker 0.1s infinite alternate;
+            transform-origin: center top;
+        }
+    </style>
+</head>
+<body class="text-gray-300 font-sans p-4 md:p-8">
+
+    <div class="bg-[#1a1c22] border border-[#262931] rounded-xl shadow-2xl max-w-7xl mx-auto overflow-hidden">
+        
+        <header class="flex items-center justify-between p-4 border-b border-[#262931]">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-[#2d303b] rounded-lg flex items-center justify-center font-bold text-yellow-400">?</div>
+                <h1 class="text-xl font-bold text-white">Crash Demo</h1>
+            </div>
+            <div class="flex items-center gap-4 text-sm text-gray-500">
+                <span class="hover:text-white cursor-pointer">? Max Profit</span>
+                <span id="player-balance" class="text-green-400 font-medium">$1,000.00</span>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-[300px,1fr]">
+
+            <aside class="p-6 border-r border-[#262931]">
+                <div class="flex gap-2 border-b border-[#262931] mb-6">
+                    <button class="px-4 py-2 font-medium text-yellow-400 border-b-2 border-yellow-400">MANUAL</button>
+                    <button class="px-4 py-2 font-medium text-gray-500 hover:text-white">AUTO</button>
+                </div>
+
+                <div class="mb-5 relative">
+                    <label class="block text-xs text-gray-500 mb-1.5 font-medium">Bet Amount</label>
+                    <div class="bg-[#101115] border border-[#262931] rounded-lg flex items-center">
+                        <span class="pl-4 pr-1 text-gray-500 text-lg">$</span>
+                        <input type="number" id="bet-amount" value="10" min="1" step="1" 
+                               class="w-full p-4 bg-transparent text-white text-xl font-bold focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                        <div class="flex text-xs text-gray-500 gap-3 pr-4">
+                            <span class="cursor-pointer hover:text-white">½</span>
+                            <span class="cursor-pointer hover:text-white">2×</span>
+                            <span class="cursor-pointer hover:text-white">Max</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-6 relative">
+                    <label class="block text-xs text-gray-500 mb-1.5 font-medium">Auto Cashout</label>
+                    <div class="bg-[#101115] border border-[#262931] rounded-lg flex items-center pr-3">
+                        <input type="number" id="auto-cashout" value="2.00" min="1.01" step="0.01"
+                               class="w-full p-4 bg-transparent text-white text-xl font-bold focus:outline-none">
+                        <span class="text-lg font-bold text-white pr-2">×</span>
+                        <button class="text-gray-500 hover:text-white">✕</button>
+                    </div>
+                </div>
+
+                <button id="action-btn" class="w-full bg-[#f4c62d] text-[#1a1c22] font-extrabold text-lg py-5 rounded-xl transition hover:brightness-110 active:scale-[0.98]">
+                    Place Bet
+                </button>
+                <button id="cashout-btn" class="hidden w-full bg-green-500 text-white font-extrabold text-lg py-5 rounded-xl transition hover:brightness-110 active:scale-[0.98]">
+                    Cash Out (2.00x)
+                </button>
+                <div id="game-status" class="hidden text-center mt-3 p-3 bg-red-950/50 text-red-300 border border-red-900 rounded-lg text-sm font-medium">Game Cradhed!</div>
+
+                <div class="mt-8 pt-6 border-t border-[#262931]">
+                    <h3 class="text-sm font-bold text-gray-100 mb-4">5 Players Online</h3>
+                    <div class="space-y-3.5 text-sm">
+                        <div class="flex justify-between items-center text-gray-400"><span>faviobtcc</span><span class="text-gray-100">$90.00</span></div>
+                        <div class="flex justify-between items-center text-green-400"><span>Mosk <span class="text-gray-500 text-xs">1.98x</span></span><span>+$50.83</span></div>
+                        <div class="flex justify-between items-center text-gray-400"><span>(Hidden)</span><span class="text-gray-100">$20.00</span></div>
+                        <div class="flex justify-between items-center text-green-400"><span>FestusM <span class="text-gray-500 text-xs">1.41x</span></span><span>+$8.46</span></div>
+                        <div class="flex justify-between items-center text-gray-400"><span>joenick</span><span class="text-gray-100">$3.27</span></div>
+                    </div>
+                </div>
+            </aside>
+
+            <main class="relative bg-[#101115] p-6 overflow-hidden min-h-[400px]">
+                
+                <svg id="crash-canvas" class="absolute inset-0 w-full h-full" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+                    <defs>
+                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    
+                    <path id="graph-path" d="M 50 950" stroke="#a07cf9" stroke-width="6" fill="none" filter="url(#glow)" stroke-linecap="round"/>
+                </svg>
+
+                <div id="rocket-container" class="absolute transform -translate-x-1/2 -translate-y-1/2 transition-transform duration-100 ease-linear pointer-events-none" style="left: 50px; bottom: 50px;">
+                    <svg width="120" height="80" viewBox="0 0 120 80" class="origin-center -rotate-[25deg]">
+                        <path d="M10 40 C 20 10, 80 10, 100 40 C 80 70, 20 70, 10 40 Z" fill="#b0bec5" stroke="#78909c" stroke-width="2"/>
+                        <circle cx="55" cy="40" r="10" fill="#f44336" stroke="#b71c1c" stroke-width="2"/> <polygon points="10,40 25,25 25,55" fill="#f44336"/> <g id="rocket-fire">
+                            <path d="M-5,40 Q -15,30 -30,40 Q -15,50 -5,40 Z" fill="#ff9800"/>
+                            <path d="M-5,40 Q -12,35 -20,40 Q -12,45 -5,40 Z" fill="#ffeb3b"/>
+                        </g>
+                    </svg>
+                </div>
+
+                <div class="absolute inset-0 flex flex-col items-center justify-center gap-2 pointer-events-none z-10">
+                    <span id="multiplier-display" class="text-white font-extrabold tabular-nums transition-colors duration-200" style="font-size: clamp(4rem, 15vw, 9rem);">1.00x</span>
+                    <span class="text-gray-400 text-lg font-medium">Current Payout</span>
+                </div>
+
+                <div class="absolute bottom-4 left-4 right-4 flex justify-between text-xs text-gray-700 font-mono pointer-events-none">
+                    <span>1.00x</span>
+                    <span>1.50x</span>
+                    <span>2.00x</span>
+                    <span>2.50x</span>
+                    <span>3.00x+</span>
+                </div>
+            </main>
+        </div>
+
+        <footer id="history-bar" class="flex items-center gap-3 p-3 bg-[#101115] border-t border-[#262931] overflow-x-auto text-xs font-mono">
+            <span class="text-gray-600 pr-2">History:</span>
+            <span class="text-green-500">2.14x</span>
+            <span class="text-red-500">1.01x</span>
+            <span class="text-green-500">10.5x</span>
+            <span class="text-red-500">1.99x</span>
+        </footer>
+    </div>
+
+    <script>
+        // --- Core Game Elements ---
+        const multiplierDisplay = document.getElementById('multiplier-display');
+        const graphPath = document.getElementById('graph-path');
+        const rocketContainer = document.getElementById('rocket-container');
+        const balanceDisplay = document.getElementById('player-balance');
+        const actionBtn = document.getElementById('action-btn');
+        const cashoutBtn = document.getElementById('cashout-btn');
+        const betInput = document.getElementById('bet-amount');
+        const autoCashoutInput = document.getElementById('auto-cashout');
+        const gameStatus = document.getElementById('game-status');
+        const historyBar = document.getElementById('history-bar');
+
+        // --- Game State Variables ---
+        let balance = 1000.00;
+        let currentBet = 0;
+        let gameState = 'IDLE'; // States: IDLE, STARTING, RUNNING, CRASHED
+        let multiplier = 1.00;
+        let startTime;
+        let crashPoint;
+        let animationId;
+        let hasCashedOut = false;
+
+        // --- Constants & Config ---
+        const SVG_WIDTH = 1000;
+        const SVG_HEIGHT = 1000;
+        const MARGIN = 50; // Map 1.00x to y=950, 0s to x=50
+        const TICK_RATE_MS = 16; // Approx 60fps
+        const MAX_HISTORY = 12;
+
+        // --- Math & Curve Functions ---
+        
+        // This function determines how the multiplier grows over time.
+        // It's a key part of making it feel like "Crash." Exponential growth works well.
+        function calculateMultiplierAtTime(timeElapsedMs) {
+            const timeSeconds = timeElapsedMs / 1000;
+            const growthRate = 0.08; // How aggressively it accelerates
+            return Math.pow(Math.E, growthRate * timeSeconds);
+        }
+
+        // Map game coordinates (time, multiplier) to SVG coordinates (x, y)
+        function mapToSvgCoords(timeMs, mult) {
+            const timeSeconds = timeMs / 1000;
+            
+            // X-axis: Map 0s to 30s to the full width (adjust 30s as needed)
+            const x = MARGIN + (timeSeconds / 30) * (SVG_WIDTH - MARGIN);
+            
+            // Y-axis: Map 1.00x to the bottom MARGIN, and say 10.00x to the top
+            const minY = SVG_HEIGHT - MARGIN;
+            const maxY = MARGIN;
+            const minMult = 1.00;
+            const maxMultVisible = 10.00; // The curve hits top edge here
+
+            const clampedMult = Math.min(Math.max(mult, minMult), maxMultVisible);
+            const y = minY - ((clampedMult - minMult) / (maxMultVisible - minMult)) * (minY - maxY);
+
+            return { x, y };
+        }
+
+        // --- UI Update Functions ---
+        function updateBalanceDisplay() {
+            balanceDisplay.textContent = `$${balance.toFixed(2)}`;
+        }
+
+        function updateActionButtons() {
+            gameStatus.classList.add('hidden');
+
+            if (gameState === 'IDLE' || gameState === 'CRASHED' || gameState === 'STARTING') {
+                actionBtn.classList.remove('hidden');
+                cashoutBtn.classList.add('hidden');
+                
+                if (gameState === 'STARTING') {
+                    actionBtn.textContent = 'Preparing...';
+                    actionBtn.disabled = true;
+                } else if (gameState === 'IDLE' || gameState === 'CRASHED') {
+                    actionBtn.textContent = 'Place Bet';
+                    actionBtn.disabled = false;
+                }
+            } else if (gameState === 'RUNNING') {
+                if (currentBet > 0 && !hasCashedOut) {
+                    actionBtn.classList.add('hidden');
+                    cashoutBtn.classList.remove('hidden');
+                    const estimatedPayout = currentBet * multiplier;
+                    cashoutBtn.textContent = `Cash Out ($${estimatedPayout.toFixed(2)})`;
+                } else if (hasCashedOut) {
+                   actionBtn.classList.remove('hidden');
+                   actionBtn.textContent = 'Cashed Out';
+                   actionBtn.disabled = true;
+                   cashoutBtn.classList.add('hidden');
+                } else {
+                    actionBtn.classList.remove('hidden');
+                    actionBtn.textContent = 'Game Running...';
+                    actionBtn.disabled = true;
+                    cashoutBtn.classList.add('hidden');
+                }
+            }
+        }
+
+        function addToHistory(roundCrashPoint) {
+            const span = document.createElement('span');
+            span.textContent = roundCrashPoint.toFixed(2) + 'x';
+            span.classList.add(roundCrashPoint >= 2.0 ? 'text-green-500' : 'text-red-500');
+            
+            // Limit history
+            if (historyBar.children.length > MAX_HISTORY + 1) { // +1 for label
+                historyBar.removeChild(historyBar.children[1]); // Remove oldest (first entry after label)
+            }
+            historyBar.appendChild(span);
+        }
+
+        // --- Core Game Loop (Main Logic) ---
+        function gameTick() {
+            if (gameState !== 'RUNNING') return;
+
+            const timeElapsedMs = Date.now() - startTime;
+            multiplier = calculateMultiplierAtTime(timeElapsedMs);
+
+            // 1. Update Display
+            multiplierDisplay.textContent = multiplier.toFixed(2) + 'x';
+
+            // 2. Update Graph Line & Rocket Position
+            const coords = mapToSvgCoords(timeElapsedMs, multiplier);
+            
+            // Add point to the SVG curve
+            const currentPath = graphPath.getAttribute('d');
+            graphPath.setAttribute('d', `${currentPath} L ${coords.x} ${coords.y}`);
+            
+            // Move the rocket
+            rocketContainer.style.left = `${coords.x / (SVG_WIDTH/100)}%`; 
+            rocketContainer.style.bottom = `${(SVG_HEIGHT - coords.y) / (SVG_HEIGHT/100)}%`;
+
+            // 3. Handle Auto Cashout
+            if (!hasCashedOut && currentBet > 0) {
+                const autoCashoutMult = parseFloat(autoCashoutInput.value);
+                if (multiplier >= autoCashoutMult) {
+                    cashOut();
+                }
+            }
+
+            // 4. Update Cashout button text
+            if (currentBet > 0 && !hasCashedOut) {
+                const estimatedPayout = currentBet * multiplier;
+                cashoutBtn.textContent = `Cash Out ($${estimatedPayout.toFixed(2)})`;
+            }
+
+            // 5. Check for Crash
+            if (multiplier >= crashPoint) {
+                crashGame();
+            } else {
+                // Request next frame
+                animationId = setTimeout(gameTick, TICK_RATE_MS);
+            }
+        }
+
+        // --- Game Flow Control Functions ---
+        function resetGame() {
+            clearTimeout(animationId);
+            multiplier = 1.00;
+            hasCashedOut = false;
+            multiplierDisplay.textContent = "1.00x";
+            multiplierDisplay.classList.remove('text-red-500');
+            
+            // Reset Graph and Rocket
+            graphPath.setAttribute('d', `M ${MARGIN} ${SVG_HEIGHT - MARGIN}`);
+            rocketContainer.style.left = `${MARGIN / (SVG_WIDTH/100)}%`;
+            rocketContainer.style.bottom = `${MARGIN / (SVG_HEIGHT/100)}%`;
+            updateActionButtons();
+        }
+
+        function prepareRound() {
+            resetGame();
+            gameState = 'STARTING';
+            updateActionButtons();
+            
+            // Simplified: Wait 2 seconds before starting the round
+            setTimeout(startRound, 2000);
+        }
+
+        function startRound() {
+            // Secretly generate the crash point. Real games use provably fair crypto logic.
+            // For simulation: Exponential distribution makes high numbers rare.
+            const r = Math.random();
+            crashPoint = 0.99 / (1 - r); // Simplistic distribution: 1% instant crash (1.00x)
+            crashPoint = Math.max(1.00, crashPoint); // Never below 1
+
+            startTime = Date.now();
+            gameState = 'RUNNING';
+            updateActionButtons();
+            gameTick(); // Start the loop
+        }
+
+        function crashGame() {
+            gameState = 'CRASHED';
+            multiplierDisplay.classList.add('text-red-500');
+            gameStatus.classList.remove('hidden');
+            gameStatus.textContent = `Game Crashed at ${crashPoint.toFixed(2)}x!`;
+            
+            addToHistory(crashPoint);
+            updateActionButtons();
+            currentBet = 0; // Clear bet for next round
+
+            // Loop back to idle/prepare
+            setTimeout(prepareRound, 4000); // 4 seconds before next round
+        }
+
+        // --- User Interaction Logic ---
+        function placeBet() {
+            const betAmount = parseFloat(betInput.value);
+            if (isNaN(betAmount) || betAmount <= 0) return;
+            if (betAmount > balance) {
+                alert("Insufficient funds!");
+                return;
+            }
+
+            balance -= betAmount;
+            currentBet = betAmount;
+            updateBalanceDisplay();
+            updateActionButtons(); // Button state will update when round starts
+        }
+
+        function cashOut() {
+            if (gameState !== 'RUNNING' || hasCashedOut || currentBet <= 0) return;
+
+            hasCashedOut = true;
+            const payout = currentBet * multiplier;
+            balance += payout;
+            
+            updateBalanceDisplay();
+            updateActionButtons(); // Changes to "Cashed Out" state
+        }
+
+        // --- Event Listeners ---
+        actionBtn.addEventListener('click', placeBet);
+        cashoutBtn.addEventListener('click', cashOut);
+
+        // --- Initial Set Up ---
+        updateBalanceDisplay();
+        // Kick off the continuous game cycle
+        prepareRound(); 
+
+    </script>
+</body>
+</html>
